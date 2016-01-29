@@ -1,84 +1,178 @@
-/*
-*control three
-*2016/1/26
+/*Move control
+*Author:Sunchaothu
+*All right reserved
+*2016/1/29
+*version 2.0
 */
-int stepping_1=11,stepping_2=10,stepping_3=9; //PWM output
-int dir_1=8,dir_2=7,dir_3=6;
-int offline_1=5  ,offline_2=4,offline_3=3;
-
-int a=127;
-//封装控制步进电机顺时针转
-void clockwise(int stepping_pin,int gpio_pin,int dir_pin,int delays)
+//==============readme=========
+//define pin:
+//int steering=2;
+//int ele_magnet=12;
+//int stepping_z=11,stepping_y=10,stepping_x=9; //PWM output
+//int dir_z=8,dir_y=7,dir_x=6;
+//int offline_z=5  ,offline_y=4,offline_x=3;
+//
+//=======================
+#include<Servo.h>
+Servo myservo;
+void steering_on()
 {
-  digitalWrite(gpio_pin,LOW);//on-line ,脱机负
-  digitalWrite(dir_pin, LOW);  //clockwise 方向负
-  analogWrite(stepping_pin,a);
-   delay(delays);
-   stop_hold(gpio_pin);
+    myservo.write(90);
+}
+ void steering_reset()
+{
+    myservo.write(0);
 }
 
-//封装控制步进电机逆时针转
-void anticlockwise(int stepping_pin,int gpio_pin,int dir_pin,int delays)
+void x_enable()
 {
-  digitalWrite(gpio_pin,LOW);//on-line ,脱机负
-  digitalWrite(dir_pin, HIGH);  //clockwise 方向+
-  analogWrite(stepping_pin,a);
-   delay(delays);
-   stop_hold(gpio_pin);
+    digitalWrite(3,LOW);
+}
+void y_enable()
+{
+    digitalWrite(4,LOW);
+}
+void z_enable()
+{
+    digitalWrite(5,LOW);
+}
+void x_disenable()
+{
+    digitalWrite(3,HIGH);
+}
+void y_disenable()
+{
+    digitalWrite(4,HIGH);
+}
+void z_disenable()
+{
+   digitalWrite(5,HIGH);
+}
+void x_clockwise()
+{
+   digitalWrite(6,LOW);
+}
+void y_clockwise()
+{
+   digitalWrite(7,LOW);
+}
+void z_clockwise()
+{
+   digitalWrite(8,LOW);
+}
+void x_anticlockwise()
+{
+   digitalWrite(6,HIGH);
+}
+void y_anticlockwise()
+{
+    digitalWrite(7,HIGH);
+}
+void z_anticlockwise()
+{
+   digitalWrite(8,HIGH);
+}
+//
+void  ele_magnet_on()
+{
+   digitalWrite(12,HIGH);
+}
+void  ele_magnet_off()
+{
+   digitalWrite(12,LOW);
 }
 
-//封装控制步进电机停
-void stop_hold(int gpio_pin)
-{
-  digitalWrite(gpio_pin,HIGH);//off-line ,脱机正
-}
+
 void setup() 
 {
-      pinMode(stepping_1,OUTPUT);
-      pinMode(dir_1,OUTPUT);
-      pinMode(offline_1,OUTPUT);
-      pinMode(stepping_2,OUTPUT);
-      pinMode(dir_2,OUTPUT);
-      pinMode(offline_2,OUTPUT);
-      pinMode(stepping_3,OUTPUT);
-      pinMode(dir_3,OUTPUT);
-      pinMode(offline_3,OUTPUT);
+      myservo.attach(2);
+      pinMode(3,OUTPUT);
+      pinMode(4,OUTPUT);
+      pinMode(5,OUTPUT);
+      pinMode(6,OUTPUT);
+      pinMode(7,OUTPUT);
+      pinMode(8,OUTPUT);
+      pinMode(9,OUTPUT);
+      pinMode(10,OUTPUT);
+      pinMode(11,OUTPUT);
+      pinMode(12,OUTPUT);
       Serial.begin(9600);
  }
 
-
-char ch1=0,ch2=0,ch3=0;
-//int delay1,delay2,delay3;
+char ch1='0',ch2='0',ch3='0';
 void loop()
 {
-  while(Serial.available()){
-   ch1=Serial.read();//delay(2);//Serial.println(ch1);
-   ch2=Serial.read();//delay(2);//Serial.println(ch2);
-   ch3=Serial.read();//delay(2);//Serial.println(ch3);
-  }
-   
-   if(ch3!='0')
-   {//Serial.println(ch3);
-   clockwise(stepping_3,offline_3,dir_3,1000*(ch3-'0'));   
-}
-else
-{
-  stop_hold(offline_3);
-}
-  if(ch2!='0')
-  {//Serial.println(ch2);
-   clockwise(stepping_2,offline_2,dir_2,1000*(ch2-'0'));
-   //Serial.println(ch1);Serial.println(ch2);Serial.println(ch3);
-   }
-   if(ch1!='0')
-   {Serial.println(ch1);
-   anticlockwise(stepping_1,offline_1,dir_1,1000*(ch1-'0'));
-     //Serial.println(ch1);Serial.println(ch2);Serial.println(ch3);
-     stop_hold(offline_2);
-   }
-   else
+   x_disenable();
+   y_disenable();
+   z_disenable();
+   analogWrite(8,127);
+   analogWrite(9,127);
+   analogWrite(10,127);
+   while(Serial.available())
    {
-     stop_hold(offline_1);
+     ch1=Serial.read();
+     ch2=Serial.read();
+     ch3=Serial.read();
+
+      z_enable();
+      z_clockwise();
+      delay(1000*(ch3-'0'));//wait to correct
+      z_disenable();
+
+      steering_on();delay(500);//steering engine work
+      z_enable();
+      z_clockwise();
+      delay(1000);//wait to correct
+      z_disenable();
+
+      x_enable();y_enable();
+      x_clockwise();y_clockwise();
+      if(ch2>ch1)
+          { delay(1000*(ch1-'0'));x_disenable();
+           delay(1000*(ch2-ch1));y_disenable();
+          }
+      else
+          {
+           delay(1000*(ch2-'0'));y_disenable();
+           delay(1000*(ch1-ch2));x_disenable();
+          }
+
+      z_anticlockwise();
+      z_enable();
+      ele_magnet_on();//eletromagnet work
+      delay(1000);
+      z_disenable();
+
+      z_clockwise();
+      z_enable();
+      delay(1000);
+      z_disenable();
+  
+      x_enable();y_enable();
+      x_anticlockwise();y_anticlockwise();
+      if(ch2>ch1)
+          { delay(1000*(ch1-'0'));x_disenable();
+           delay(1000*(ch2-ch1));y_disenable();
+          }
+      else
+          {
+           delay(1000*(ch2-'0'));y_disenable();
+           delay(1000*(ch1-ch2));x_disenable();
+          }
+
+      z_anticlockwise(); 
+      z_enable();
+      delay(1000);//wait to correct
+      z_disenable();
+      steering_reset();
+      delay(500);
+
+      z_anticlockwise();
+      z_enable();
+      delay(1000*(ch3-'0'));
+      z_disenable();
+      ele_magnet_off();
+      delay(1000);
    }
 }
 //it's ok
