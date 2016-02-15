@@ -1,3 +1,4 @@
+# coding: utf-8
 # 安装 mysql, python-mysql
 # 安装过程中需自行设置mysql的root账号密码
 sudo apt-get install mysql-server python-mysqldb
