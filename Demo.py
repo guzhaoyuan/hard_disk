@@ -40,8 +40,8 @@ curs.execute ("""
 # import data from .xls
 
 # xlrd.Book.encoding = "utf-8"
-xlsfile = u".\电子元件清单.xls" #unicode编码的文字
-# xlsfile.encode('utf-8') #转换成utf-8格式
+xlsfile = r".\testData.xls" #unicode编码的文字
+xlsfile.encode('utf-8') #转换成utf-8格式
 book = xlrd.open_workbook(xlsfile,'r')
 sheet=book.sheet_by_index(0)     #通过sheet索引获得sheet对象
 nrows = sheet.nrows # 获取总行数
