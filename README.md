@@ -15,11 +15,26 @@
 
 ###硬件
 硬件部分包括电路驱动和排线的优化 @陈 ，以及外观设计和结构优化 @常。
+
 ###软件
 软件分为驱动控制和用户交互。
 驱动控制利用arduino驱动步进电机和电磁铁工作。
 用户交互部分，树莓派驱动显示器与用户交互，运行本地数据库，并且通过串口控制arduino底层控制。
 树莓派部分用python进行io控制，python连接数据库，运行Python2.7 和 PyQt4 进行用户交互图形化显示 @孙。
+
+####软件接口说明
+
+
+| 函数          | 参数      | 返回值    |功能 |说明|
+| -------       |---------- |--------   |---  |-------------------|
+|openDB	        |null	      |true?	    |打开并且连接数据库	|连接本地数据库，账号密码都是预设的无需改变。连接速度较快也可以时连时断。
+|addRecord      |	type, model, parameter, x, y, z, status	|true?	|添加元件,将occupied置为true	|添加记录|
+|deleteRecord	  |type, model, parameter	|true?	|删除元件，将occupied置为false|
+|checkInRecord  |	type, model, parameter, x,y,z	|true?	|将status设为在架上，并且指定元件的位置，将occupied置为true
+|checkOutRecord	|type, model, parameter|	true?	|将status设为借出，将occupied置为false
+|closeDB	|null	|true?|	断开连接数据库	
+|loadAllRecords	|null|	tuple	|将所有元件都读取出来	|用以将数据库元件进行列表显示
+|loadCertainTypeRecords	|type	|tuple	|将type为XX的所有元件读取出来	|用以检索数据库特定种类的元件
 
 ##资料说明
 所有我有的资料都会传到nas.thu-skyworks.org:/upload/2015新人项目工作辅助组，以下是我上传的内容的简介
