@@ -1,7 +1,8 @@
 
 DROP DATABASE IF EXISTS HardDisk;
 CREATE DATABASE IF NOT EXISTS HardDisk
-CHARACTER SET utf8;
+CHARACTER SET utf8
+COLLATE utf8_general_ci;
 USE HardDisk;
 
 DROP USER admin@localhost;

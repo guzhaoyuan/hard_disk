@@ -15,16 +15,16 @@ tableName = "Components"
 
 # login
 db = MySQLdb.connect(host, user, pwd, dbName)
-curs=db.cursor()
-curs.execute("SET NAMES utf8");
+curs = db.cursor()
+curs.execute("SET NAMES utf8")
 
 # recreate the table
 try:
-    curs.execute (""" DROP TABLE %s""" % tableName)
+    curs.execute (""" DROP TABLE %s """ % tableName)
 except:
     print "%s does not exist" % tableName
     
-curs.execute ("""
+curs.execute("""
     CREATE TABLE %s ( 
         名称 VARCHAR(100),
         型号 VARCHAR(100), 
@@ -41,7 +41,7 @@ curs.execute ("""
 
 # xlrd.Book.encoding = "utf-8"
 xlsfile = r"./testData.xls"
-book = xlrd.open_workbook(xlsfile,'r')
+book = xlrd.open_workbook(xlsfile, 'r')
 sheet=book.sheet_by_index(0)     #通过sheet索引获得sheet对象
 nrows = sheet.nrows # 获取总行数
 # 生产插入的数据
@@ -59,7 +59,7 @@ for r in range(5,nrows):
     values.append(row_data)  
 
 #插入多条记录
-curs.execute("SET NAMES utf8");
+curs.execute("SET NAMES utf8")
 try:
     curs.executemany("INSERT INTO %s" % tableName +
                  "(名称,型号,封装,数量,X,Y,Z)" +
