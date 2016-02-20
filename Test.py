@@ -2,4 +2,4 @@
 
 import Db
 
-Db.demo()
+Db.Test()
