@@ -1,11 +1,10 @@
 /*Move control
 *Author:Sunchaothu@thu-skyworks
 *All right reserved
-*2016/1/29
-*version 2.0
+*version 3.0
 */
 
-/*====update version 2.1======
+/*====update version 3.0======
 *2016/2/22  
 *add reset-function
 * add inverse process 
@@ -29,7 +28,8 @@
 // A= x+y ,    B = x-y
 //=======================
 
-const int length=5;// the lenth of each check 
+const int length=5;// the length of each check 
+const int speed_ =10; //to be ascertain 
 #include<Servo.h>
 Servo myservo;
 
@@ -100,11 +100,6 @@ void  ele_magnet_off()
    digitalWrite(12,LOW);
 }
 
-void reset_func()
-{
-  
-}
-
 void x_go_move()
 {
   //x=1/2*(A+B)
@@ -148,6 +143,10 @@ void z_fall_move()
    C_anticlockwise();
    C_enable();
 }
+void z_stop()
+{
+  C_disable();
+}
 
 void xy_go_move()
 {
@@ -157,7 +156,33 @@ void xy_go_move()
 
 void xy_back_move()
 {
-   
+   analogWrite(10,0);
+   A_anticlockwise();A_enable();
+}
+
+void xy_stop_move()
+{
+  A_disable(); B_disable(); analogWrite(10,127);
+}
+
+unsigned long worktime(char ch)
+{
+  return (unsigned long)(ch-'0')*length/speed_;
+}
+
+void attach_stop_x()
+{
+  x_stop();
+}
+
+void attach_stop_y()
+{
+  y_stop();
+}
+
+void attach_stop_z()
+{
+ z_stop(); 
 }
 
 void setup() 
@@ -173,83 +198,192 @@ void setup()
       pinMode(10,OUTPUT);
       pinMode(11,OUTPUT);
       pinMode(12,OUTPUT);
+      attachInterrupt(2, attach_stop_x, CHANGE);  // pin 21
+      attachInterrupt(3, attach_stop_y, CHANGE);  // pin 19
+      attachInterrupt(4, attach_stop_z, CHANGE);  // pin 18
       Serial.begin(9600);
  }
 
-char ch1='0',ch2='0',ch3='0';
+char x_='0',y_='0',z_='0', flag = '0';
+unsigned long work_time;
 void loop()
 {
-   A_disable();
-   B_disable();
-   C_disable();
    analogWrite(8,127);
    analogWrite(9,127);
    analogWrite(10,127);
    while(Serial.available())
    {
-     ch1=Serial.read();
-     ch2=Serial.read();
-     ch3=Serial.read();
-
-      C_enable();
-      C_clockwise();
-      delay(1000*(ch3-'0'));//wait to correct
-      C_disable();
-
-      steering_on();delay(500);//steering engine work
-      C_enable();
-      C_clockwise();
-      delay(1000);//wait to correct
-      C_disable();
-
-      A_enable();B_enable();
-      A_clockwise();B_clockwise();
-      if(ch2>ch1)
-         { delay(1000*(ch1-'0'));A_disable();
-           delay(1000*(ch2-ch1));B_disable();
-          }
+     flag = Serial.read();
+     if( flag == '1')
+        {
+           x_=Serial.read();
+           y_=Serial.read();
+           z_=Serial.read();
+           work_time=worktime(z_);
+           z_rise_move(); delay(work_time);z_stop();
+      
+            steering_on(); delay(500);//steering engine work
+            z_rise_move(); delay(2000);//wait to ascertain
+       
+            if(y_>x_)
+               { 
+                  work_time = worktime(x_);
+                  xy_go_move(); delay(work_time); xy_stop_move();
+      
+                  work_time = worktime(y_-x_); 
+                  y_go_move();  delay(work_time); y_stop();
+                }
+            else if (y_==x_)
+                {
+                  work_time = worktime(y_);
+                  xy_go_move(); delay(work_time); xy_stop_move();
+                }
+             else
+             {
+                  work_time = worktime(y_);
+                  xy_go_move(); delay(work_time); xy_stop_move();
+      
+                  work_time = worktime(x_-y_);
+                  x_go_move();  delay(work_time); x_stop();
+             }
+            
+            //eletromagnet work
+            ele_magnet_on();
+            z_fall_move();
+            delay(2000); // wait to ascertain
+            z_stop();
+      
+            z_rise_move();
+            delay(2000);
+            z_stop();
+        
+            if(y_>x_)
+               { 
+                  work_time = worktime(x_);
+                  xy_back_move(); delay(work_time); xy_stop_move();
+      
+                  work_time = worktime(y_-x_);
+                  y_back_move();  delay(work_time); y_stop();
+                }
+            else if (y_==x_)
+                {
+                  work_time = worktime(y_);
+                  xy_back_move(); delay(work_time); xy_stop_move();
+                }
+             else
+             {
+                  work_time = worktime(y_);
+                  xy_back_move(); delay(work_time); xy_stop_move();
+      
+                  work_time = worktime(x_-y_);
+                  x_back_move();  delay(work_time); x_stop();
+             }
+            z_fall_move();
+            delay(1000);//wait to correct
+            z_stop();
+            steering_reset();
+            delay(500);
+            
+            work_time=worktime(z_);
+            z_fall_move();
+            delay(work_time);
+            z_stop();
+      
+            ele_magnet_off();
+      
+            //add limit switch
+            x_go_move();
+            y_go_move();
+            z_fall_move();
+        }
+        
+       // fang hui
       else
-          {
-           delay(1000*(ch2-'0'));B_disable();
-           delay(1000*(ch1-ch2));A_disable();
-          }
+       {
+           x_=Serial.read();
+           y_=Serial.read();
+           z_=Serial.read();
 
-      C_anticlockwise();
-      C_enable();
-      ele_magnet_on();//eletromagnet work
-      delay(1000);
-      C_disable();
+           ele_magnet_on();
+            work_time=worktime(z_);
+            z_rise_move();
+            delay(work_time);
+            z_stop();
 
-      C_clockwise();
-      C_enable();
-     delay(1000);
-      C_disable();
-  
-      A_enable();B_enable();
-      A_anticlockwise();B_anticlockwise();
-      if(ch2>ch1)
-          { delay(1000*(ch1-'0'));A_disable();
-           delay(1000*(ch2-ch1));B_disable();
-          }
-      else
-          {
-           delay(1000*(ch2-'0'));B_disable();
-           delay(1000*(ch1-ch2));A_disable();
-          } 
-      C_anticlockwise(); 
-      C_enable();
-      delay(1000);//wait to correct
-      C_disable();
-      steering_reset();
-      delay(500);
+            steering_on(); delay(500);//steering engine work
+            z_rise_move(); delay(2000);//wait to ascertain
+       
+            if(y_>x_)
+               { 
+                  work_time = worktime(x_);
+                  xy_go_move(); delay(work_time); xy_stop_move();
+      
+                  work_time = worktime(y_-x_);
+                  y_go_move();  delay(work_time); y_stop();
+                }
+            else if (y_==x_)
+                {
+                  work_time = worktime(y_);
+                  xy_go_move(); delay(work_time); xy_stop_move();
+                }
+             else
+             {
+                  work_time = worktime(y_);
+                  xy_go_move(); delay(work_time); xy_stop_move();
+      
+                  work_time = worktime(x_-y_);
+                  x_go_move();  delay(work_time); x_stop();
+             }
+            
+            z_fall_move();delay(2000); z_stop();  // delay wait to ascertain
+            ele_magnet_off();
 
-      C_anticlockwise();
-     C_enable();
-     delay(100*(ch3-'0'));
-     C_disable();
-      ele_magnet_off();
-      delay(1000);
+            z_rise_move();
+            delay(2000);
+            z_stop();
+        
+            if(y_>x_)
+               { 
+                  work_time = worktime(x_);
+                  xy_back_move(); delay(work_time); xy_stop_move();
+      
+                  work_time = worktime(y_-x_);
+                  y_back_move();  delay(work_time); y_stop();
+                }
+            else if (y_==x_)
+                {
+                  work_time = worktime(y_);
+                  xy_back_move(); delay(work_time); xy_stop_move();
+                }
+             else
+             {
+                  work_time = worktime(y_);
+                  xy_back_move(); delay(work_time); xy_stop_move();
+      
+                  work_time = worktime(x_-y_);
+                  x_back_move();  delay(work_time); x_stop();
+             }
+            z_fall_move();delay(1000);//wait to correct
+            z_stop();
+            steering_reset();
+            delay(500);
+            
+            work_time=worktime(z_);
+            z_fall_move();
+            delay(work_time);
+            z_stop();
+      
+            ele_magnet_off();
+      
+            //add limit switch
+            x_go_move();
+            y_go_move();
+            z_fall_move();
+        
+         }
   }
+
+
 }
 //it'sok
 
