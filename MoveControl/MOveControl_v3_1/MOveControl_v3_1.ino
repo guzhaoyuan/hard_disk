@@ -1,7 +1,12 @@
 /*Move control
 *Author:Sunchaothu@thu-skyworks
 *All right reserved
-*version 3.1
+*version 3.1.1
+*/
+
+/*
+*version 3.11  to be OK
+*
 */
 
 /*====update version 3.1======
@@ -41,6 +46,7 @@
 #define C_MIN_PIN          18
 #define C_MAX_PIN          19
 
+#define  ele_pin  8
 const int length=5;// the length of each check 
 const int speed_ =10; //to be ascertain 
 int  work_time=0;
@@ -48,10 +54,10 @@ Servo myservo1,myservo2,myservo3,myservo4;
 
 void steering_on()
 {
-   myservo1.write(90);
-   myservo2.write(90);
-   myservo3.write(90);
-   myservo4.write(90);
+   myservo1.write(20);
+   myservo2.write(20);
+   myservo3.write(20);
+   myservo4.write(20);
 }
 void steering_reset()
 {
@@ -113,11 +119,11 @@ void C_anticlockwise()
 
 void  ele_magnet_on()
 {
-  digitalWrite(12,HIGH);
+  digitalWrite(ele_pin,HIGH);
 }
 void  ele_magnet_off()
 {
-  digitalWrite(12,LOW);
+  digitalWrite(ele_pin,LOW);
 }
 
 void pulse_AB()
@@ -250,7 +256,7 @@ void xy_stop()
 
 int worktime(int t)
 {
- return  (t-(int)'0')*1000;
+ return  (t-(int)'0')*4000;
 }
 
 void attach_stop_x()
@@ -283,7 +289,7 @@ void setup()
       pinMode(C_DIR_PIN,OUTPUT);
       pinMode(C_ENABLE_PIN,OUTPUT);
       pinMode(C_STEP_PIN,OUTPUT);
-      pinMode(12,OUTPUT);
+      pinMode(ele_pin,OUTPUT);
 //      digitalWrite(A_ENABLE_PIN,LOW);
  //     digitalWrite(B_ENABLE_PIN,LOW);
 //     
@@ -291,7 +297,7 @@ void setup()
       attachInterrupt(3, attach_stop_y, CHANGE);  // pin 19
       attachInterrupt(4, attach_stop_z, CHANGE);  // pin 18
       Serial.begin(9600);
-
+      steering_reset();
  }
 
 int x_co=48,y_co=48,z_co=48, flag = 48;
@@ -311,7 +317,7 @@ void loop()
         
         z_rise_move(z_co);z_stop();
 
-        steering_on(); delay(500);//steering engine work
+        steering_on();Serial.println('a');delay(500);//steering engine work
         z_rise_move(50); z_stop();//wait to ascertain, '2'!
          
          if(y_co>x_co)
@@ -367,71 +373,71 @@ void loop()
             z_fall_move(100);
                
         }
-      else 
-         {   
-        //  Serial.println('a');delay(2);
-          x_co=Serial.read();delay(2);
-          Serial.println(x_co);delay(2);
-          y_co=Serial.read();delay(2);
-          Serial.println(y_co);delay(2);
-          z_co=Serial.read();delay(2);
-          Serial.println(z_co);delay(2);
-         
-           ele_magnet_on();
-           z_rise_move(z_co);z_stop();
-
-            steering_on(); delay(500);//steering engine work
-            z_rise_move(50); delay(2000);//wait to ascertain,'2'
-       
-            if(y_co>x_co)
-            { 
-               xy_go_move(x_co); xy_stop(); 
-               y_go_move(y_co-x_co);  y_stop();
-             }
-           else if (y_co==x_co)
-             {
-               xy_go_move(y_co);  xy_stop();
-             }
-           else
-           {
-               xy_go_move(y_co); xy_stop(); 
-                x_go_move(x_co-y_co);  x_stop();
-           }
-            
-            z_fall_move(49); z_stop();  // to  be ascertain
-            ele_magnet_off();
-
-            z_rise_move(49);z_stop();
-        
-            if(y_co>x_co)
-            { 
-               xy_back_move(x_co); xy_stop(); 
-               y_back_move(y_co-x_co);  y_stop();
-             }
-         else if (y_co==x_co)
-             {
-               xy_back_move(y_co);  xy_stop();
-             }
-           else
-           {
-               xy_back_move(y_co); xy_stop(); 
-                x_back_move(x_co-y_co);  x_stop();
-           }
-  
-
-            z_fall_move(50);  z_stop();
-            steering_reset();delay(500);
-            
-            z_fall_move(z_co);
-            z_stop();
-  
-
-           
-            //add limit switch
-            x_go_move(100);
-            y_go_move(100);
-            z_fall_move(100);
-          }
+  //      else 
+  //         {   
+  //        //  Serial.println('a');delay(2);
+  //          x_co=Serial.read();delay(2);
+  //          Serial.println(x_co);delay(2);
+  //          y_co=Serial.read();delay(2);
+  //          Serial.println(y_co);delay(2);
+  //          z_co=Serial.read();delay(2);
+  //          Serial.println(z_co);delay(2);
+  //         
+  //           ele_magnet_on();
+  //           z_rise_move(z_co);z_stop();
+  //
+  //            steering_on(); delay(500);//steering engine work
+  //            z_rise_move(50); delay(2000);//wait to ascertain,'2'
+  //       
+  //            if(y_co>x_co)
+  //            { 
+  //               xy_go_move(x_co); xy_stop(); 
+  //               y_go_move(y_co-x_co);  y_stop();
+  //             }
+  //           else if (y_co==x_co)
+  //             {
+  //               xy_go_move(y_co);  xy_stop();
+  //             }
+  //           else
+  //           {
+  //               xy_go_move(y_co); xy_stop(); 
+  //                x_go_move(x_co-y_co);  x_stop();
+  //           }
+  //            
+  //            z_fall_move(49); z_stop();  // to  be ascertain
+  //            ele_magnet_off();
+  //
+  //            z_rise_move(49);z_stop();
+  //        
+  //            if(y_co>x_co)
+  //            { 
+  //               xy_back_move(x_co); xy_stop(); 
+  //               y_back_move(y_co-x_co);  y_stop();
+  //             }
+  //         else if (y_co==x_co)
+  //             {
+  //               xy_back_move(y_co);  xy_stop();
+  //             }
+  //           else
+  //           {
+  //               xy_back_move(y_co); xy_stop(); 
+  //                x_back_move(x_co-y_co);  x_stop();
+  //           }
+  //  
+  //
+  //            z_fall_move(50);  z_stop();
+  //            steering_reset();delay(500);
+  //            
+  //            z_fall_move(z_co);
+  //            z_stop();
+  //  
+  //
+  //           
+  //            //add limit switch
+  //            x_go_move(100);
+  //            y_go_move(100);
+  //            z_fall_move(100);
+  //          }
              
       }
 }
