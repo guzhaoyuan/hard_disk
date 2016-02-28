@@ -32,19 +32,20 @@
 #define A_DIR_PIN          55
 #define A_ENABLE_PIN       38
 #define A_MIN_PIN           3
-#define A_MAX_PIN           2
+//#define A_MAX_PIN           2
 
 #define B_STEP_PIN         60
 #define B_DIR_PIN          61
 #define B_ENABLE_PIN       56
-#define B_MIN_PIN          14
-#define B_MAX_PIN          15
+#define B_MIN_PIN          2                              
+//#define B_MIN_PIN          14
+//#define B_MAX_PIN          15
 
 #define C_STEP_PIN         46
 #define C_DIR_PIN          48
 #define C_ENABLE_PIN       62
 #define C_MIN_PIN          18
-#define C_MAX_PIN          19
+//#define C_MAX_PIN          19
 
 #define  ele_pin  8
 const int length=5;// the length of each check 
@@ -293,9 +294,9 @@ void setup()
 //      digitalWrite(A_ENABLE_PIN,LOW);
  //     digitalWrite(B_ENABLE_PIN,LOW);
 //     
-      attachInterrupt(2, attach_stop_x, CHANGE);  // pin 21
-      attachInterrupt(3, attach_stop_y, CHANGE);  // pin 19
-      attachInterrupt(4, attach_stop_z, CHANGE);  // pin 18
+      attachInterrupt(0, attach_stop_x, CHANGE);      //X_MIN 
+      attachInterrupt(1, attach_stop_y, CHANGE);     //X_MAX
+      attachInterrupt(5, attach_stop_z, CHANGE);     //Z_MIN
       Serial.begin(9600);
       steering_reset();
  }
