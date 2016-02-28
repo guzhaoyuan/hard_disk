@@ -143,26 +143,28 @@ def loadAllRecords():
 
 # 获取type
 # 输出：Tuple
-def loadType():
+def loadType(status):
     curs.execute("SELECT DISTINCT type FROM %s" %
-                 tableName)
+                 tableName +
+                 " WHERE status = %s", status)
     return curs.fetchall()
 
 
 # 获取model
 # 输出：Tuple
-def loadModel(type):
+def loadModel(type, status):
     curs.execute("SELECT DISTINCT model FROM %s " % tableName +
-                 "WHERE type = %s", type)
+                 "WHERE type = %s AND status = %s",
+                 (type, status))
     return curs.fetchall()
 
 
 # 获取parameter
 # 输出：Tuple
-def loadParameter(type, model):
+def loadParameter(type, model, status):
     curs.execute("SELECT parameter FROM %s " % tableName +
-                 "WHERE type = %s AND model = %s",
-                 (type, model))
+                 "WHERE type = %s AND model = %s AND " +
+                 "status = %s", (type, model, status))
     return curs.fetchall()
 
 
@@ -251,11 +253,40 @@ def loadFile(filename):
     return True
 
 
+# 随机借出部分条目
+def randomLoadFile(filename):
+    import random
+    random.seed(0)
+    book = xlrd.open_workbook(filename, 'r')
+    sheet = book.sheet_by_index(0)  # 通过sheet索引获得sheet对象
+    nrows = sheet.nrows  # 获取总行数
+    # 生产插入的数据
+    values = []
+    for r in range(5, nrows):
+        row_data = sheet.row_values(r)  # 获得第i行的数据列表
+        # 从Unicode转码为utf-8
+        for i in range(len(row_data)):
+            if isinstance(row_data[i], unicode):
+                row_data[i] = row_data[i].encode("utf-8")
+        # 获取存储位置
+        pos = nextEmpty()
+        if pos == None:
+            return False
+        else:
+            if addRecord(row_data[0], row_data[1], row_data[2],
+                      pos[0], pos[1], pos[2], (random.random() > 0.25)):
+                continue
+            else:
+                return False
+    return True
+
+
 # Demo 将表格恢复到默认
 def Demo():
     openDB()
     recreateTable()
-    loadFile(r"./testData.xls")
+    # loadFile(r"./testData.xls")
+    randomLoadFile(r"./testData.xls")
     printTable()
     closeDB()
 
