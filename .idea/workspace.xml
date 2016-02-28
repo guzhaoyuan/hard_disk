@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="54f539d6-29aa-4ab5-a352-d5e7eb1b886b" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Db.py" afterPath="$PROJECT_DIR$/Db.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/comboselect.py" afterPath="$PROJECT_DIR$/comboselect.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/maincombo.py" afterPath="$PROJECT_DIR$/maincombo.py" />
     </list>
     <ignored path="GUI.iws" />
     <ignored path=".idea/workspace.xml" />
