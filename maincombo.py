@@ -40,21 +40,35 @@ port_flag = 0
 ser = []
 
 
-def echoThread():
-    while port_flag:
-        while ser.inWaiting():
-            data = ord(ser.read(1))
-            print data
-        time.sleep(0.1)
-
 class combosel(QtGui.QWidget):
+
+    def barCodeListener(self):
+        past = []
+        while 1:
+            self.ui_sel.lineEdit.setFocus()
+            if past != self.ui_sel.lineEdit.text():
+                past = self.ui_sel.lineEdit.text()
+                print past
+                global executing_flag
+                executing_flag = 0
+            try:
+                time.sleep(0.3)
+            except:
+                continue
+
+    def echoThread(self):
+        while port_flag:
+            while ser.inWaiting():
+                data = ord(ser.read(1))
+                print data
+                time.sleep(0.1)
+
     def __init__(self):
         super(combosel, self).__init__()
         self.ui_sel = Ui_select()
         self.ui_sel.setupUi(self)
         self.setWindowTitle(QtCore.QString.fromUtf8("实体硬盘"))
-        self.setWindowIcon(QtGui.QIcon('../Document/images/QQ.png'))
-        
+
         self.ui_sel.comboBox_borrow_type.clear()  # 清空items
         self.ui_sel.pushButton_borrow_ok.hide()
         self.ui_sel.comboBox_borrow_type.addItem(u'请选择')
@@ -63,6 +77,7 @@ class combosel(QtGui.QWidget):
         self.ui_sel.pushButton_return_ok.hide()
         self.ui_sel.comboBox_return_type.addItem(u'请选择')
 
+
         # 初始化串口
         global ser, port_flag
         try:
@@ -70,9 +85,14 @@ class combosel(QtGui.QWidget):
             port_flag = 1
         except:
             print "Serial Port Failed!"
-        t = threading.Thread(target=echoThread)
-        t.setDaemon(True)
-        t.start()
+        t1 = threading.Thread(target=self.echoThread)
+        t1.setDaemon(True)
+        t1.start()
+
+        # init listener
+        t2 = threading.Thread(target=self.barCodeListener)
+        t2.setDaemon(True)
+        t2.start()
 
         # 刷新数据库
         Db.Demo()
@@ -136,7 +156,6 @@ class combosel(QtGui.QWidget):
                 for result in self.dictModel:
                     self.ui_sel.comboBox_borrow_model.addItem(unicode(result[0], 'utf-8'))
 
-
     # 城市联动区县列表
     def onActivatedBorrowParameter(self, scuindex):
         self.ui_sel.comboBox_borrow_parameter.clear()
@@ -175,7 +194,6 @@ class combosel(QtGui.QWidget):
         if reply == 16384:
             self.borrowComponent(type_name, model_name, parameter_name)
         print reply
-
 
     # Return Group
     def onActivatedReturn(self, cuindex):
@@ -240,14 +258,14 @@ class combosel(QtGui.QWidget):
                                               QtGui.QMessageBox.No)
         print reply
 
-
     def borrowComponent(self, type, model, parameter):
         global executing_flag
         if Db.checkOutRecord(type, model, parameter):
             self.refresh()
             executing_flag = 1
             # send command here
-
+            # command = "\x89\x45\x56"
+            # ser.write(command)
         return
 
     def returnComponent(self, type, model, parameter):
@@ -256,7 +274,6 @@ class combosel(QtGui.QWidget):
             self.refresh()
             executing_flag = 1
             # send command here
-
 
     def refresh(self):
         self.onActivatedBorrowModel(0)

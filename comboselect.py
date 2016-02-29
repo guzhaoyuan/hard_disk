@@ -151,6 +151,12 @@ class Ui_select(object):
         self.comboBox_return_parameter.setItemText(0, _translate("select", "请选择", None))
         self.pushButton_return_ok.setText(_translate("select", "确定", None))
 
+        self.lineEdit = QtGui.QLineEdit(select)
+        self.lineEdit.selectAll()
+        self.lineEdit.setFocus()
+        # self.lineEdit.setFocusPolicy()
+        self.lineEdit.setGeometry(400, 364, 75, 22)
+        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
 
 if __name__ == "__main__":
     import sys
