@@ -45,7 +45,7 @@ class combosel(QtGui.QWidget):
     def barCodeListener(self):
         past = []
         while 1:
-            self.ui_sel.lineEdit.setFocus()
+           #  self.ui_sel.lineEdit.setFocus()
             if past != self.ui_sel.lineEdit.text():
                 past = self.ui_sel.lineEdit.text()
                 print past
@@ -90,9 +90,9 @@ class combosel(QtGui.QWidget):
         t1.start()
 
         # init listener
-        t2 = threading.Thread(target=self.barCodeListener)
-        t2.setDaemon(True)
-        t2.start()
+        # t2 = threading.Thread(target=self.barCodeListener)
+        # t2.setDaemon(True)
+        # t2.start()
 
         # 刷新数据库
         Db.Demo()
